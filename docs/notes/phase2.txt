@@ -1,0 +1,8 @@
+Phase 2 acceptance criteria and evaluation
+Three nights: Game(night=1/2/3) builds 5/6/7 lanterns at ticket positions. The browser provides a menu, night introductions, results and replay.
+Dash: a fresh press starts a 12-tick dash at 14 m/s; cooldown is 90 ticks. Wind Charm raises run speed to 7.2 m/s for 600 ticks and removes dash cooldown while active.
+Drifter: on nights 2/3, a chasing drifter touching a player with five motes steals up to three and flees. Pulse can repel it.
+Pause: a press toggles paused state; simulation time does not advance while paused.
+Headless: --night 1/2/3, v1.1 snapshot fields, and JSONL events are available. Regression checks from phase 1 remain in the test suite.
+AI use: Codex extended the core, browser game, and tests. Precise token/cost values are not exposed by this client.
+Evaluation: six automated tests passed; a 21,600-tick Night 3 run ended at tick 16,560 in 0.27 seconds on this machine. Visual FPS was not measured yet.

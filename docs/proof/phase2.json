@@ -1,0 +1,1 @@
+{"phase":2,"checks":[{"requirement":"night map counts, dash, pause, charm and drifter", "command":"npm test", "result":"6 passed"},{"requirement":"headless runtime under 30 seconds", "command":"node src/headless.mjs --seed 2 --night 3 --ticks 21600 --snapshot-every 600 --out out.jsonl", "result":"0.27 seconds; end tick 16560, lost"}]}
