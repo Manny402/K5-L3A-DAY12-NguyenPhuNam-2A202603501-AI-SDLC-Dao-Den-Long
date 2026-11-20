@@ -1,0 +1,4 @@
+ADR 1: Fuel and dawn victory
+Decision: store fuel as integer sixtieths of a unit. A lit lamp starts at 6000 units, loses one unit per tick, and loses five additional units per draining shade per tick. This avoids float drift at the 30-unit safety boundary. A lamp that reaches zero turns off, resets deposited to zero, and retains ever_lit so its next cost is five motes.
+The previous immediate all-lit victory is replaced by a check at the final tick. The player must have flames left and at least ceil(0.6 * lamp count) lamps lit. This preserves full-tick ordering, including simultaneous fuel drain and player damage.
+AI use: Codex changed core logic and tests; precise token/cost data is unavailable in this client.

@@ -1,0 +1,1 @@
+{"phase":3,"checks":[{"requirement":"fuel, refuel, relight, drain, dawn victory, regression", "command":"npm test", "result":"10 passed"},{"requirement":"v1.2 JSONL", "command":"node src/headless.mjs --seed 3 --night 1 --ticks 100 --out out.jsonl", "result":"end ticks=100, state=playing, score=0"}]}
