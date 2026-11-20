@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.log
+bench.json
+soak.json
+out.jsonl
+run*.jsonl
+.DS_Store

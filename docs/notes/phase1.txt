@@ -1,0 +1,7 @@
+Phase 1 assumptions and decisions
+Engine: browser WebGL using Three.js; shared JavaScript simulation also runs in Node without a window.
+Initial Night 1 values: player speed 6 m/s, capacity 10, lantern cost 10, pulse cost 3, island radius 40 m. Values are declared in game.contract.json.
+Score: +100 per newly lit lantern, +5 per shade stunned, winning bonus floor(seconds left)*2 + flames*50.
+No extra creative entity was added. The five lanterns, motes, shades, movement, pulse, health and replay are represented in the browser.
+AI use: Codex drafted code and tests. Token/cost estimate is unavailable in this client; no claim is made about a precise count.
+Evaluation: automated tests and deterministic headless comparison passed. Visual gameplay has not been measured for frame rate yet.

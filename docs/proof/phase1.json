@@ -1,0 +1,8 @@
+{
+  "phase": 1,
+  "checks": [
+    {"requirement": "scenario interaction lights lantern", "command": "npm test", "result": "pass: 3 tests"},
+    {"requirement": "deterministic headless output", "command": "node src/headless.mjs --seed 17 --night 1 --ticks 600 --out run1.jsonl (twice)", "result": "SHA-256 hashes equal"},
+    {"requirement": "JSONL end record", "command": "npm run headless -- --seed 1 --night 1 --ticks 120 --out out.jsonl", "result": "end ticks=120, state=playing, score=0"}
+  ]
+}
