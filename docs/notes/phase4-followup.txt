@@ -1,0 +1,6 @@
+Follow-up to Phase 4, version 1.0.1
+Procedural Web Audio now provides a repeating night melody plus distinct cues for pickup, lighting, pulse, hit, jump, dash, win, loss, shade spawn and the last ten seconds. Volume uses the saved settings value. No downloaded music or sound asset is used.
+HUD now shows one mote slot per capacity unit (ten initially, up to twenty), separate dash and pulse cooldown indicators, a warning timer and an edge arrow to the closest unlit lantern when it leaves the camera view.
+Night 3 has two ramps at 30 and 150 degrees, a half-annulus tier, the upper disk and a solid bell tower. Core movement climbs the ramps, blocks vertical ledges and the tower, and falls to lower tiers. Upper geometry fades when it obstructs the player camera.
+Unlit lanterns are compressed to 80 percent height and have a visible jagged tear on their paper; the tear disappears when the lantern is lit.
+Evidence: 18 automated tests, browser smoke checks for Night 1 HUD, Night 3 scene and arrow, plus screenshots and a new 30-second benchmark. Phase tags 1-4 and the v1.0.0 release remain historical snapshots; this change is a new patch release.

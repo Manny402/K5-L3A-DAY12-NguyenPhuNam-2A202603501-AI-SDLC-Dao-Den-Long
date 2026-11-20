@@ -1,3 +1,51 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Đảo Đèn Lồng</title><style>
-body{margin:0;background:#0E1430;color:#F5F1E6;font:18px system-ui;overflow:hidden}canvas{display:block}#hud{position:absolute;inset:0;pointer-events:none;padding:18px;box-sizing:border-box}#top{display:flex;justify-content:space-between}#lights{color:#F2C14E}#bottom{position:absolute;bottom:20px;left:20px;background:#0E1430bb;padding:12px;border-radius:12px}#center{position:absolute;inset:0;display:grid;place-items:center;text-align:center}#panel{background:#0E1430df;padding:28px;border:2px solid #F2C14E;border-radius:16px;pointer-events:auto;max-width:560px}button{font:inherit;background:#FFB347;border:0;padding:12px 24px;cursor:pointer;border-radius:8px;margin:4px}#hint{position:absolute;bottom:85px;left:50%;transform:translateX(-50%);background:#0E1430bb;padding:8px;border-radius:8px}input{font:inherit}
-</style></head><body><div id="hud"><div id="top"><span id="life"></span><span id="timer"></span><span id="lights"></span></div><div id="hint"></div><div id="bottom"></div><div id="center"><div id="panel"><h1>Đảo Đèn Lồng</h1><p>Đêm 1 — Đảo Bến</p><p>WASD di chuyển · Space nhảy · Shift lướt · E nạp đèn · Q tỏa sáng · P tạm dừng</p><button id="start">Bắt đầu</button><button id="settings">Cài đặt</button></div></div></div><script type="module" src="/public/game.mjs"></script></body></html>
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đảo Đèn Lồng</title>
+  <style>
+    body { margin:0; overflow:hidden; background:#0E1430; color:#F5F1E6; font:18px system-ui,sans-serif; }
+    canvas { display:block; }
+    #hud { position:absolute; inset:0; pointer-events:none; padding:18px; box-sizing:border-box; }
+    #top { display:flex; justify-content:space-between; align-items:start; gap:16px; font-weight:700; text-shadow:0 2px 4px #0E1430; }
+    #timer { font-size:1.35em; }
+    #timer.danger:not(.still) { animation:blink 1s steps(2,start) infinite; }
+    #lights { color:#F2C14E; text-align:right; }
+    @keyframes blink { 50% { opacity:.35; } }
+    #hint { position:absolute; bottom:118px; left:50%; transform:translateX(-50%); max-width:80%; text-align:center; background:#0E1430dd; padding:8px 12px; border-radius:8px; }
+    #hint:empty { display:none; }
+    #bottom { position:absolute; bottom:20px; left:20px; right:20px; display:flex; justify-content:space-between; align-items:end; gap:20px; }
+    #moteBar, #cooldowns { background:#0E1430dd; border:1px solid #F2C14E; border-radius:10px; padding:10px 12px; }
+    #moteBar { position:absolute; left:50%; bottom:0; transform:translateX(-50%); min-width:240px; }
+    #moteSlots { display:grid; grid-template-columns:repeat(10,20px); gap:4px; margin-top:8px; }
+    .moteSlot { width:18px; height:20px; border:1px solid #F2C14E; border-radius:5px; background:#1B2350; box-sizing:border-box; }
+    .moteSlot.filled { background:#FFE58A; box-shadow:0 0 8px #FFE58A; }
+    #cooldowns { text-align:right; min-width:180px; margin-left:auto; }
+    #offscreenArrow { position:absolute; z-index:4; display:none; width:42px; height:42px; border:2px solid #F2C14E; border-radius:50%; background:#0E1430dd; color:#FFE9B0; font-size:30px; line-height:38px; text-align:center; box-sizing:border-box; transform:translate(-50%,-50%); }
+    #center { position:absolute; inset:0; display:grid; place-items:center; text-align:center; }
+    #panel { background:#0E1430ee; border:2px solid #F2C14E; border-radius:16px; max-width:560px; max-height:85vh; overflow:auto; padding:28px; pointer-events:auto; }
+    #panel label { display:inline-block; margin:4px; }
+    button { font:inherit; background:#FFB347; color:#120A1A; border:0; padding:12px 24px; margin:4px; cursor:pointer; border-radius:8px; }
+    input { font:inherit; }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <div id="top"><span id="life"></span><span id="timer"></span><span id="lights"></span></div>
+    <div id="offscreenArrow" aria-label="Hướng tới đèn chưa sáng">➤</div>
+    <div id="hint"></div>
+    <div id="bottom">
+      <div id="moteBar"><span id="moteCount">Đom đóm 0/10</span><div id="moteSlots"></div></div>
+      <div id="cooldowns"><div id="dashStatus">➤ Lướt: sẵn sàng</div><div id="pulseStatus">✦ Tỏa sáng: sẵn sàng</div></div>
+    </div>
+    <div id="center"><div id="panel">
+      <h1>Đảo Đèn Lồng</h1>
+      <p>Đêm 1 — Đảo Bến</p>
+      <p>WASD di chuyển · Space nhảy · Shift lướt · E nạp đèn · Q tỏa sáng · P tạm dừng</p>
+      <button id="start">Bắt đầu</button><button id="settings">Cài đặt</button>
+    </div></div>
+  </div>
+  <script type="module" src="/public/game.mjs"></script>
+</body>
+</html>

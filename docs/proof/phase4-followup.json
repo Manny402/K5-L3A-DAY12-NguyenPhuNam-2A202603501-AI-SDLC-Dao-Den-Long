@@ -1,0 +1,13 @@
+{
+  "version": "1.0.1",
+  "requirements": ["night music and action cues", "mote slots and cooldown HUD", "off-screen unlit-lantern arrow", "Night 3 ramps and collision", "torn paper on unlit lamps"],
+  "checks": [
+    {"command":"npm test", "result":"18 passed, including ramp, ledge and tower behavior"},
+    {"command":"npm run test:ui", "result":"Night 1 HUD, Night 3 scene and off-screen arrow passed"},
+    {"command":"npm run headless -- --seed 2 --night 3 --ticks 600 --out out.jsonl", "result":"exit 0"},
+    {"command":"npm run bench -- --seed 42 --duration 30 --out bench.json", "result":{"avg_fps":245.77,"p1_low_fps":102.38,"frame_ms_p95":6.4,"frames":7373,"load_ms":2065,"peak_mem_mb":null}},
+    {"command":"npm run soak -- --seed 7 --nights 10 --out soak.json", "result":{"crashes":0,"mem_start_mb":32.16,"mem_end_mb":36.23,"duration_s":0.97}}
+  ],
+  "images": ["docs/proof/phase4-followup-benchmark.png", "docs/proof/night3-terrain.png", "docs/proof/lantern-arrow.png"],
+  "note": "Measurements are local to this Windows machine. The Night 3 screenshot uses a browser test route to select that night; gameplay logic is unchanged."
+}

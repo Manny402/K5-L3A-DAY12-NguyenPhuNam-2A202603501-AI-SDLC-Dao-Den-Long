@@ -12,6 +12,7 @@ const round = (x, d = 3) => Number(x.toFixed(d));
 const distance = (a, b) => Math.hypot(a[0] - b[0], a[2] - b[2]);
 const norm = (x, z) => { const l = Math.hypot(x, z); return l > 1 ? [x / l, z / l] : [x, z]; };
 const polar = (r, deg) => [round(r * Math.cos(deg * Math.PI / 180)), 0, round(r * Math.sin(deg * Math.PI / 180))];
+export function night3RampY(x,z){for(const deg of [30,150]){const a=deg*Math.PI/180,u=Math.cos(a),v=Math.sin(a),radial=x*u+z*v,sideways=-x*v+z*u;if(radial>=24-1e-9&&radial<=30+1e-9&&Math.abs(sideways)<=1.5+1e-9)return Math.max(0,Math.min(3,(30-radial)/2));}return null;}
 function rng(seed) { let n = seed >>> 0; return () => ((n = (1664525 * n + 1013904223) >>> 0) / 4294967296); }
 
 export class Game {
@@ -27,6 +28,7 @@ export class Game {
     this.time_left_ticks = Math.round((scenario.time_left_s ?? T[`night${night}_duration_s`])*60);
     this.time_left_s = this.time_left_ticks/60;
     this.player = {pos: clone(scenario.player?.pos ?? [0, 0, 0]), vel: [0, 0, 0], grounded: true, carried: scenario.player?.carried ?? 0, flames: scenario.player?.flames ?? T.flames, invuln: scenario.player?.invuln_ticks ?? 0, pulse_cd: scenario.player?.pulse_cd_ticks ?? 0, dash_cd: scenario.player?.dash_cd_ticks ?? 0, dash_left: 0, charm: scenario.player?.charm_ticks ?? 0, facing: [0, 1], launch: null, respawn: 0,successful_lights:scenario.player?.successful_lights??0};
+    this.player.grounded=Math.abs(this.player.pos[1]-this.groundY(this.player.pos,this.player.pos[1]+.15))<.01;
     this.lanterns = lanternPositions[night].map((pos, i) => ({id: `L${i + 1}`, pos: clone(pos), lit: false, deposited: 0,fuelUnits:0,ever_lit:false,relit_count:0}));
     for (const item of scenario.lanterns ?? []) {
       const lantern = this.lanterns.find(l => l.id === item.id);
@@ -58,13 +60,15 @@ export class Game {
   addShade(pos, id) { this.shades.push({id: id ?? `S${this.nextShade++}`, pos: clone(pos), state: 'wander', stun: 0, recoil: 0, safe:0}); }
   event(name, data = {}) { this.events.push({type: 'event', tick: this.tick, name, data}); }
   benchmarkStep(){this.tick++;this.sim_tick++;for(const s of this.shades){const a=(this.tick*.012+Number(s.id.slice(1))*.7);s.pos[0]+=Math.cos(a)*4*DT;s.pos[2]+=Math.sin(a)*4*DT;s.state='wander';}}
-  groundY(pos){const [x,,z]=pos;const d=Math.hypot(x,z);
+  groundY(pos,maxY=Infinity){const [x,,z]=pos;const d=Math.hypot(x,z);
     if(this.night===1)return d<=40?0:-Infinity;
     if(this.night===2)return Math.hypot(x,z)<=28||Math.hypot(x-70,z)<=28||(x>=26&&x<=44&&Math.abs(z)<=2)?0:-Infinity;
     if(d>45)return -Infinity;
-    if(d<=8)return 6;
-    if(d>=12&&d<=24&&z>0)return 3;
-    return 0;
+    const levels=[0],ramp=night3RampY(x,z);
+    if(ramp!==null)levels.push(ramp);
+    if(d>=12&&d<=24&&z>0)levels.push(3);
+    if(d<=8)levels.push(6);
+    return Math.max(...levels.filter(y=>y<=maxY+1e-9));
   }
   step(input = {}) {
     if (!['playing','paused'].includes(this.state)) return [];
@@ -96,8 +100,10 @@ export class Game {
     else if(!p.launch){p.vel[0]=p.respawn?0:mx*(p.charm>0?7.2:T.player_speed);p.vel[2]=p.respawn?0:mz*(p.charm>0?7.2:T.player_speed);}
     if (this.held.jump && !prev.jump && p.grounded) { p.vel[1] = 7; p.grounded = false; }
     if (!p.grounded && p.dash_left===0) p.vel[1] -= 20 * DT;
+    const before=p.pos.slice();
     for (let i = 0; i < 3; i++) p.pos[i] += p.vel[i] * DT;
-    const ground=this.groundY(p.pos);
+    if(this.night===3){const beforeHigh=this.groundY(before),afterHigh=this.groundY(p.pos),beforeR=Math.hypot(before[0],before[2]),afterR=Math.hypot(p.pos[0],p.pos[2]);const wall=afterHigh>beforeHigh+.15&&p.pos[1]<afterHigh-.01;const tower=beforeR>=2&&afterR<2&&p.pos[1]>=6&&p.pos[1]<14;if(wall||tower){p.pos[0]=before[0];p.pos[2]=before[2];p.vel[0]=0;p.vel[2]=0;}}
+    const ground=this.groundY(p.pos,before[1]+.15);
     if(p.pos[1]<=ground && p.vel[1]<=0 && ground>-Infinity) {p.pos[1]=ground;p.vel[1]=0;p.grounded=true;p.launch=null;}
     else p.grounded=false;
     if(p.grounded&&this.night===2){for(const [pad,target] of [[[20,0,18],[70,0,0]],[[50,0,-18],[0,0,0]]])if(distance(p.pos,pad)<=1){const d=distance(pad,target);p.vel=[(target[0]-pad[0])/d*24,14,(target[2]-pad[2])/d*24];p.launch=true;p.grounded=false;break;}}
