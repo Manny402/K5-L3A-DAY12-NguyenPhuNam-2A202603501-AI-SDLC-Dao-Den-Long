@@ -1,0 +1,12 @@
+{
+  "phase": 4,
+  "machine": "Windows 10.0.26200; Chromium-based browser; local measurement",
+  "checks": [
+    {"requirement":"unit and contract regression", "command":"npm test", "result":"16 passed"},
+    {"requirement":"browser can render game", "command":"npm run test:ui", "result":"UI smoke passed"},
+    {"requirement":"benchmark scene, 30 seconds after 3-second warmup", "command":"npm run bench -- --seed 42 --duration 30 --out bench.json --screenshot docs/proof/phase4-benchmark.png", "result":{"avg_fps":325.33,"p1_low_fps":158.78,"frame_ms_p95":4.4,"frames":9760,"load_ms":1917,"peak_mem_mb":null,"vsync_off":true}},
+    {"requirement":"ten-night soak", "command":"npm run soak -- --seed 7 --nights 10 --out soak.json", "result":{"crashes":0,"mem_start_mb":32.21,"mem_end_mb":36.34,"duration_s":0.77}},
+    {"requirement":"leaderboard export", "command":"npm start -- --export-leaderboard out.json", "result":{"entries":[]}}
+  ],
+  "limitations": "The benchmark value is local and does not predict grading-machine performance. Web builds cannot directly report browser RSS, so peak_mem_mb is null. The leaderboard was empty during export. One full benchmark attempt ended when the browser closed; the next full run completed. An earlier soak run with JIT exceeded the memory-ratio threshold; the soak command now uses --jitless and passed three consecutive local runs."
+}

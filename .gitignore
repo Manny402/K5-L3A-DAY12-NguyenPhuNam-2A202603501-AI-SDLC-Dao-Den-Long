@@ -4,5 +4,7 @@ node_modules/
 bench.json
 soak.json
 out.jsonl
+out.json
 run*.jsonl
+release/
 .DS_Store

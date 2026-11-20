@@ -1,0 +1,25 @@
+DAO DEN LONG - QUICK START
+
+Requirements: Node.js 20.18+ and a modern Chromium-based browser. Tested with the vinai conda environment on Windows. The game is served locally and plays in the browser on macOS, Linux or Windows.
+
+Install and play (2 commands):
+  npm ci
+  npm start
+Open http://localhost:8080
+The GitHub Release ZIP includes the installed pure-JavaScript dependencies, so from the extracted folder use npm start directly.
+
+Controls: W/A/S/D move, Space jump, left Shift dash, E interact, Q pulse, P or Escape pause. Rebind controls in Settings. Collect motes, feed lanterns, keep at least 60 percent lit until dawn. Each successful night adds to total score. Losing lets you retry the night.
+
+Tests and headless:
+  npm test
+  npm run headless -- --seed 1 --night 1 --ticks 600 --out out.jsonl
+  npm run headless -- --seed 1 --night 2 --scenario scenario.json --inputs inputs.json --ticks 1000 --snapshot-every 10 --out out.jsonl
+
+Performance and stability:
+  npm run bench -- --seed 42 --duration 30 --out bench.json
+  npm run soak -- --seed 7 --nights 10 --out soak.json
+
+Leaderboard export:
+  npm start -- --export-leaderboard out.json
+
+The graphical benchmark needs installed Chrome or Edge. It opens a 1280x720 window and disables VSync through Chromium flags. As a browser build, peak process RSS is reported null. Scores are stored in ~/.dao-den-long/leaderboard.json. Notes, acceptance criteria and proof are under docs/notes and docs/proof. Contract commands and tuning are in game.contract.json.

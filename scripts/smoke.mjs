@@ -1,0 +1,6 @@
+import {chromium} from 'playwright-core';import {spawn} from 'node:child_process';import {existsSync} from 'node:fs';
+const paths=process.platform==='win32'?['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe']:['/usr/bin/google-chrome','/usr/bin/chromium','/usr/bin/chromium-browser','/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'];
+const executablePath=paths.find(existsSync);if(!executablePath)throw new Error('Chrome or Edge required');
+const server=spawn(process.execPath,['src/server.mjs','--port','8089'],{stdio:'ignore'});let browser;
+try{await new Promise(r=>setTimeout(r,500));browser=await chromium.launch({executablePath,headless:true});const page=await browser.newPage({viewport:{width:1280,height:720}});const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://localhost:8089');await page.getByRole('button',{name:'Bắt đầu'}).click();await page.getByRole('button',{name:'Bắt đầu'}).click();await page.waitForTimeout(300);const text=await page.locator('#lights').textContent();if(!text.includes('/5'))throw new Error(`Game HUD did not start: ${text}`);if(errors.length)throw new Error(errors.join('\n'));console.log('UI smoke passed: canvas and Night 1 HUD render');}
+finally{if(browser)await browser.close();server.kill();}

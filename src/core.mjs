@@ -24,7 +24,8 @@ export class Game {
     this.sim_tick = 0;
     this.state = 'playing';
     this.score = 0;
-    this.time_left_s = scenario.time_left_s ?? T[`night${night}_duration_s`];
+    this.time_left_ticks = Math.round((scenario.time_left_s ?? T[`night${night}_duration_s`])*60);
+    this.time_left_s = this.time_left_ticks/60;
     this.player = {pos: clone(scenario.player?.pos ?? [0, 0, 0]), vel: [0, 0, 0], grounded: true, carried: scenario.player?.carried ?? 0, flames: scenario.player?.flames ?? T.flames, invuln: scenario.player?.invuln_ticks ?? 0, pulse_cd: scenario.player?.pulse_cd_ticks ?? 0, dash_cd: scenario.player?.dash_cd_ticks ?? 0, dash_left: 0, charm: scenario.player?.charm_ticks ?? 0, facing: [0, 1], launch: null, respawn: 0,successful_lights:scenario.player?.successful_lights??0};
     this.lanterns = lanternPositions[night].map((pos, i) => ({id: `L${i + 1}`, pos: clone(pos), lit: false, deposited: 0,fuelUnits:0,ever_lit:false,relit_count:0}));
     for (const item of scenario.lanterns ?? []) {
@@ -56,6 +57,7 @@ export class Game {
   addMote(pos,kind='random',ttl=0) { this.motes.push({id: `M${this.nextMote++}`, pos: clone(pos),kind,ttl,pickable:this.sim_tick+1}); }
   addShade(pos, id) { this.shades.push({id: id ?? `S${this.nextShade++}`, pos: clone(pos), state: 'wander', stun: 0, recoil: 0, safe:0}); }
   event(name, data = {}) { this.events.push({type: 'event', tick: this.tick, name, data}); }
+  benchmarkStep(){this.tick++;this.sim_tick++;for(const s of this.shades){const a=(this.tick*.012+Number(s.id.slice(1))*.7);s.pos[0]+=Math.cos(a)*4*DT;s.pos[2]+=Math.sin(a)*4*DT;s.state='wander';}}
   groundY(pos){const [x,,z]=pos;const d=Math.hypot(x,z);
     if(this.night===1)return d<=40?0:-Infinity;
     if(this.night===2)return Math.hypot(x,z)<=28||Math.hypot(x-70,z)<=28||(x>=26&&x<=44&&Math.abs(z)<=2)?0:-Infinity;
@@ -73,11 +75,13 @@ export class Game {
     if(this.held.pause && !prev.pause) {this.state=this.state==='paused'?'playing':'paused';this.event(this.state==='paused'?'paused':'resumed');return this.events;}
     if(this.state==='paused') return this.events;
     this.sim_tick++;
-    this.time_left_s = Math.max(0, this.time_left_s - DT);
+    this.time_left_ticks=Math.max(0,this.time_left_ticks-1);
+    this.time_left_s=this.time_left_ticks/60;
     const p = this.player;
     p.invuln = Math.max(0, p.invuln - 1);
     p.pulse_cd = Math.max(0, p.pulse_cd - 1);
-    p.dash_cd=Math.max(0,p.dash_cd-1);p.charm=Math.max(0,p.charm-1);p.respawn=Math.max(0,p.respawn-1);
+    p.dash_cd=Math.max(0,p.dash_cd-1);p.charm=Math.max(0,p.charm-1);
+    if(p.respawn>0){p.respawn--;if(p.respawn===0){p.pos=[0,0,0];p.vel=[0,0,0];p.grounded=true;p.invuln=90;}}
     for(const c of this.charms) if(!c.available && c.respawn>0) {c.respawn--;if(c.respawn===0)c.available=true;}
     for(let i=this.motes.length-1;i>=0;i--)if(this.motes[i].kind==='dropped'&&--this.motes[i].ttl<=0)this.motes.splice(i,1);
     for (const s of this.shades) s.stun = Math.max(0, s.stun - 1);
@@ -86,6 +90,7 @@ export class Game {
     const a = this.held.cam_yaw_deg * Math.PI / 180;
     [mx, mz] = [mx * Math.cos(a) + mz * Math.sin(a), -mx * Math.sin(a) + mz * Math.cos(a)];
     if (Math.hypot(mx, mz) > 0) p.facing = [mx, mz];
+    if(!p.respawn){
     if(!p.respawn&&this.held.dash&&!prev.dash&&p.dash_left===0&&(p.dash_cd===0||p.charm>0)) {p.dash_left=12;p.dash_cd=p.charm>0?0:90;p.dash_dir=[mx,mz];if(Math.hypot(mx,mz)===0)p.dash_dir=p.facing;this.event('dash',{});}
     if(p.dash_left>0){p.vel[0]=p.dash_dir[0]*14;p.vel[2]=p.dash_dir[1]*14;p.dash_left--;}
     else if(!p.launch){p.vel[0]=p.respawn?0:mx*(p.charm>0?7.2:T.player_speed);p.vel[2]=p.respawn?0:mz*(p.charm>0?7.2:T.player_speed);}
@@ -99,6 +104,7 @@ export class Game {
     if(p.grounded&&this.night===3&&distance(p.pos,[0,3,13])<=1&&p.pos[1]>=3){p.vel=[0,12,-8];p.launch=true;p.grounded=false;}
     if(this.night===3&&this.wind_enabled){const cycle=this.sim_tick%1800;this.wind.active=cycle>=120&&cycle<420;if(cycle===120)this.wind.dir_deg=Math.floor(this.random()*360);if(this.wind.active){p.pos[0]+=Math.cos(this.wind.dir_deg*Math.PI/180)*2*DT;p.pos[2]+=Math.sin(this.wind.dir_deg*Math.PI/180)*2*DT;}}
     if (p.pos[1] < -10) this.hit('fall');
+    }
     for (let i = this.motes.length - 1; i >= 0; i--) {
       const m = this.motes[i];
       if (!p.respawn&&p.carried < Math.min(20,10+2*p.successful_lights) && this.sim_tick>=m.pickable && distance(p.pos, m.pos) <= T.pickup_radius && Math.abs(p.pos[1] - m.pos[1]) <= 1.5) {
@@ -127,7 +133,7 @@ export class Game {
     for (const s of this.shades) {
       if(s.safe>0)s.safe--;
       if (s.stun){if(s.push_left>0){s.pos[0]+=s.push[0]*4/15;s.pos[2]+=s.push[1]*4/15;s.push_left--;}if(s.stun===0)s.state='wander';continue;}
-      if(s.recoil>0){s.recoil--;s.state='recoil';continue;}
+      if(s.recoil>0){s.recoil--;s.state='recoil';s.pos[0]+=s.recoil_dir[0]*2/60;s.pos[2]+=s.recoil_dir[1]*2/60;continue;}
       if(s.state==='drain'){const target=this.lanterns.find(l=>l.id===s.target_lantern_id);if(!target?.lit||target.fuelUnits>=1800||distance(s.pos,target.pos)>2)s.state='wander';else if(distance(s.pos,p.pos)<=6)s.state='chase';else continue;}
       const d = distance(s.pos,p.pos);
       s.state = d <= 12 || (s.state==='chase'&&d<=18) ? 'chase' : 'wander';
@@ -141,7 +147,7 @@ export class Game {
     for(const d of this.drifters){if(d.state==='removed')continue;const dist=distance(d.pos,p.pos);if(d.state!=='flee')d.state=p.carried>=5&&dist<=15?'chase':'idle';const speed=d.state==='idle'?2:7;const sign=d.state==='flee'?-1:1;if(dist>0){d.pos[0]+=(p.pos[0]-d.pos[0])/dist*speed*DT*sign;d.pos[2]+=(p.pos[2]-d.pos[2])/dist*speed*DT*sign;}if(d.state==='flee'&&--d.timer<=0)d.state='removed';}
     for(const d of this.drifters)if(!p.respawn&&d.state==='chase'&&distance(d.pos,p.pos)<=1.2){const amount=Math.min(3,p.carried);p.carried-=amount;d.stolen=amount;d.state='flee';d.timer=240;this.event('drifter_steal',{drifter_id:d.id,amount,carried:p.carried});}
     for (const s of this.shades) {
-      if(!p.respawn&&!s.stun&&!s.safe&&!p.invuln&&distance(s.pos,p.pos)<=T.shade_hit_radius&&Math.abs(s.pos[1]-p.pos[1])<=1.5){this.hit('shade');s.recoil=60;break;}
+      if(!p.respawn&&!s.stun&&!s.safe&&!p.invuln&&distance(s.pos,p.pos)<=T.shade_hit_radius&&Math.abs(s.pos[1]-p.pos[1])<=1.5){const dx=s.pos[0]-p.pos[0],dz=s.pos[2]-p.pos[2],d=Math.hypot(dx,dz)||1;this.hit('shade');s.recoil=60;s.recoil_dir=[dx===0&&dz===0?1:dx/d,dz/d];break;}
     }
     if (this.random_motes && this.sim_tick % 240 === 0 && this.motes.length < 30) {
       const vacant = this.motePoints.filter(pt => !this.motes.some(m => distance(m.pos,pt)<0.01));
@@ -168,8 +174,8 @@ export class Game {
     const dropped=by==='fall'?p.carried:Math.floor(p.carried*T.hit_drop_ratio);
     p.carried-=dropped;
     if(by==='shade')for(let i=0;i<dropped;i++) this.addMote([p.pos[0]+1.5*Math.cos(i*2.4),0,p.pos[2]+1.5*Math.sin(i*2.4)],'dropped',480);
-    p.invuln=Math.round(T.invuln_s*60);
-    if(by==='fall') {p.pos=[0,0,0];p.vel=[0,0,0];p.grounded=true;p.respawn=60;}
+    p.invuln=by==='fall'?0:Math.round(T.invuln_s*60);
+    if(by==='fall'&&p.flames>0) {p.vel=[0,0,0];p.grounded=false;p.respawn=60;}
     this.event('player_hit',{by,flames:p.flames,dropped,...(by==='fall'?{lost:dropped}:{})});
   }
   finish(state,reason) {this.state=state;this.event('game_over',{result:state,reason});}

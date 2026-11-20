@@ -1,14 +1,19 @@
 {
   "name": "dao-den-long",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "node src/server.mjs",
     "headless": "node src/headless.mjs",
-    "test": "node --test tests"
+    "bench": "node src/bench.mjs",
+    "soak": "node --jitless --expose-gc src/soak.mjs",
+    "test": "node --test tests",
+    "test:ui": "node scripts/smoke.mjs"
   },
   "dependencies": {
+    "playwright-core": "^1.56.1",
     "three": "0.181.2"
   }
 }

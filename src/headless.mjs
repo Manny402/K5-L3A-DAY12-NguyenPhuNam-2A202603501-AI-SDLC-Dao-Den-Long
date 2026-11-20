@@ -26,7 +26,7 @@ try {
   const inputs=arg('--inputs',null)?readJson(arg('--inputs')):{frames:[]};
   validate(scenario,'scenario');validate(inputs,'inputs');
   const game=new Game({seed,night,scenario});
-  const lines=[JSON.stringify(game.snapshot())];
+  const lines=[JSON.stringify(game.snapshot()),JSON.stringify({type:'event',tick:0,name:'night_start',data:{night}})];
   let fi=0;
   for(let k=0;k<ticks&&['playing','paused'].includes(game.state);k++) {
     let frame={};

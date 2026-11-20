@@ -1,3 +1,4 @@
 Phase 1: first playable island, v1.0 headless contract and deterministic JSONL output.
 Phase 2: three islands, standardized tuning, dash, Drifters, Wind Charm, pause, v1.1 snapshots.
 Phase 3 breaking changes: night lengths become 240/270/300 seconds; all-lit no longer wins early; lamps lose fuel and can extinguish; relighting costs five motes; scoring is replaced; win reason is dawn_survived; v1.2 snapshots add fuel and capacity.
+Phase 4: graphical benchmark command, deterministic soak command, persistent top-10 leaderboard, keyboard rebinding, large text and reduced-motion settings, v1.3 contract.

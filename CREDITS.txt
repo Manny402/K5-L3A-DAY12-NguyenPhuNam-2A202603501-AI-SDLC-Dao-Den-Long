@@ -1,0 +1,1 @@
+All character, landscape and interface shapes are programmatically generated in this repository. Sound cues use browser Web Audio oscillators; no external media assets are included. Three.js is used for rendering and is distributed under the MIT license. Codex assisted with code and test drafting. No external image or audio generation tools were used.
